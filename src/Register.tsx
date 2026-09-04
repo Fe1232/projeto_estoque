@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { getApiErrorMessage, requestJson } from "./api";
 
 function Register() {
     const [nameStore, setNameStore] = useState(''); //Armazena o nome
@@ -23,7 +24,7 @@ function Register() {
 
         try {
             //Envia o método post
-            const response = await fetch("http://localhost:8000/users", {
+            await requestJson("/users", {
                 method: "POST", //Avisa que é um método post
                 headers: {
                     "Content-Type": "application/json" // Etiqueta: "Estou enviando JSON"
@@ -31,18 +32,9 @@ function Register() {
                 body: JSON.stringify(newUser) //Converte para o formato JSON
             });
 
-            if (response.ok) {
-                //Se o usuário foi cadastrado com sucesso
-                //alert("Usuário Cadastrado com sucesso!");
-                navigate("/login");
-            } else {
-                //Se houve um erro nos dados
-                alert("Erro no cadastro. Confira os seus dados.")
-            }
-
-        } catch (err) {
-            alert("Erro no Servidor.");
-            console.log(err);
+            navigate("/login");
+        } catch (error) {
+            alert(getApiErrorMessage(error, 'Não foi possível criar a conta agora.'));
         }
     }
 

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getApiErrorMessage, requestJson } from "./api";
 
 function RegisterToProduct() {
     const location = useLocation();
@@ -13,53 +14,61 @@ function RegisterToProduct() {
     const [quantity, setQuantity] = useState(0);
     const [warningPoint, setWarningPoint] = useState(0);
 
-    //Pega o userId do state
-    const userId = location.state?.userId;
-    //Pega o nome do usuário
-    const user = location.state?.user;
-    //Pega o email do usuário
-    const email = location.state?.email;
+    // Get the logged-in user information from navigation state or local storage.
+    const userId = location.state?.userId ?? localStorage.getItem('userId') ?? '';
+    const user = location.state?.user ?? localStorage.getItem('user') ?? '';
+    const email = location.state?.email ?? localStorage.getItem('email') ?? '';
+    const token = location.state?.token ?? localStorage.getItem('token');
 
     const handleNewProduct = async (e: FormEvent) => {
         e.preventDefault();
 
-        //Instância um produto
+        if (!userId) {
+            alert('Sua sessão não foi encontrada. Entre novamente.');
+            return;
+        }
+
+        // Ensure the userId is the exact value returned by the login endpoint.
+        const resolvedUserId = String(userId).trim();
+        if (!resolvedUserId) {
+            alert('Sua sessão é inválida. Entre novamente.');
+            return;
+        }
+
+        const parsedCostPrice = Number.parseFloat(String(costPrice).replace(',', '.'));
+        const parsedPriceToSell = Number.parseFloat(String(priceToSell).replace(',', '.'));
+
+        // Create a product payload that matches the backend expectations.
         const newProduct = {
             nameProduct: nameProduct,
             category: category,
-            costPrice: parseFloat(costPrice.replace(',', '.')) || 0,
-            priceToSell: parseFloat(priceToSell.replace(',', '.')) || 0,
+            costPrice: Number.isNaN(parsedCostPrice) ? 0 : parsedCostPrice,
+            priceToSell: Number.isNaN(parsedPriceToSell) ? 0 : parsedPriceToSell,
             quantity: quantity,
             warningPoint: warningPoint,
-            userId: userId
+            userId: resolvedUserId
         };
 
         try {
-            //Chama o post para criar o produto 
-            const response = await fetch("http://localhost:8000/products", {
-                method: "POST",
+            await requestJson('/products', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json" // Etiqueta: "Estou enviando JSON"
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(newProduct) //Converte para o formato JSON
+                body: JSON.stringify(newProduct)
             });
 
-            if (response.ok) {
-                //Se o úsuario foi criado com sucesso
-                //alert("Produto Cadastrado com sucesso!");
-                navigate("/main_page", {
-                    state: {
-                        userId: userId,
-                        user: user,
-                        email: email
-                    }
-                });
-            } else {
-                //Se houver um erro no cadastro
-                alert("Erro no cadastro: Revise os seus dados.");
-            }
-        } catch (err) {
-            console.log(err);
+            navigate('/main_page', {
+                state: {
+                    userId: resolvedUserId,
+                    user: user,
+                    email: email,
+                    token: token
+                }
+            });
+        } catch (error) {
+            alert(getApiErrorMessage(error, 'Não foi possível cadastrar o produto agora.'));
         }
     }
 

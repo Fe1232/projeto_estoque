@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getApiErrorMessage, requestJson } from "./api";
 
 function Login() {
     const [email, setEmail] = useState(''); //Armazena o email
@@ -12,36 +13,30 @@ function Login() {
 
         try {
             //Fazemos um post enviando os apenas as credenciais atuais
-            const response = await fetch("http://localhost:8000/login", {
+            const userData = await requestJson<{
+                user: { id: string; nameStore: string; email: string };
+                token: string;
+            }>("/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, key }) //Enviamos o que foi digitado
             });
 
-            //Checamos a resposta da api
-            if (response.ok) {
-                const userData = await response.json(); //Recebemos os dados do usuário logado
+            localStorage.setItem('userId', userData.user.id);
+            localStorage.setItem('user', userData.user.nameStore);
+            localStorage.setItem('email', userData.user.email);
+            localStorage.setItem('token', userData.token);
 
-                //save to localStorage items
-                localStorage.setItem('userId', userData.id);
-                localStorage.setItem('user', userData.nameStore);
-                localStorage.setItem('email', userData.email);
-                
-                //Navigate to the main_page
-                navigate("/main_page", {
-                    state: {
-                        userId: userData.id,
-                        user: userData.nameStore,
-                        email: userData.email
-                    }
-                });
-            } else {
-                alert("E-mail ou senha incorretos.");
-            }
-        } catch (err) {
-            //Erro ralacionado a api ou ao servidor
-            alert(`Erro ao conectar ao servidor.`);
-            console.log(err);
+            navigate("/main_page", {
+                state: {
+                    userId: userData.user.id,
+                    user: userData.user.nameStore,
+                    email: userData.user.email,
+                    token: userData.token
+                }
+            });
+        } catch (error) {
+            alert(getApiErrorMessage(error, 'Não foi possível entrar na conta agora.'));
         }
     }
 

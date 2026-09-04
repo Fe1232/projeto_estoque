@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { getApiErrorMessage, requestJson } from "./api";
 
 interface Product {
     id: string;
@@ -41,48 +42,42 @@ function MainPage() {
     //Save the store's email address
     const email = location.state?.email ?? localStorage.getItem('email');
 
+    const token = location.state?.token ?? localStorage.getItem('token');
+
     //Função callbak que carrega os produtos
-    const fetchMyProducts = async () => {
+    const fetchMyProducts = useCallback(async () => {
         try {
             //Chama o método get
-            const response = await fetch(`http://localhost:8000/products/${userId}`);
-            const data = await response.json(); //Converte do json
+            const data = await requestJson<Product[]>('/products', {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             // Só atualiza se o que veio da API for realmente uma lista (Array)
             if (Array.isArray(data)) {
                 setMyProducts(data);
             } else {
-                console.error("A API não devolveu uma lista:", data);
-                setMyProducts([]); // Se der erro, mantém como lista vazia
+                throw new Error('A resposta da API não contém uma lista de produtos.');
             }
-        } catch (err) {
-            //Se houver um erro retorna isto
-            console.error(`Erro ao carregar os produtos: ${err}`);
+        } catch (error) {
+            alert(getApiErrorMessage(error, 'Não foi possível carregar os produtos agora.'));
         }
-    }
+    }, [token]);
 
-    const handleClickDelete = async (id: String) => {
+    const handleClickDelete = async (id: string) => {
         try {
-            const response = await fetch(`http://localhost:8000/products/${id}`, {
+            await requestJson(`/products/${id}`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: userId })
+                headers: { 
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
-            if (response.ok) {
-                //Remove da lista o produto e mantem os que possuem id diferetes dele
-                const updatedList = myProducts.filter(product => product.id !== id);
-                //Atualiza a lista
-                setMyProducts(updatedList);
-
-                //Se foi removido com sucesso retorna isto
-                //alert("Produto removido com sucesso!");
-            } else {
-                //Se houver um problema quanto ao delete referente ao usuário retorna isto
-                alert("Não foi possivel deletar o produto.");
-            }
-        } catch (err) {
-            //Se houver um problema referente ao banco de dados
-            console.error("Erro ao deletar", err);
+            const updatedList = myProducts.filter(product => product.id !== id);
+            setMyProducts(updatedList);
+        } catch (error) {
+            alert(getApiErrorMessage(error, 'Não foi possível deletar o produto agora.'));
         }
     }
 
@@ -101,34 +96,26 @@ function MainPage() {
 
         try {
             //Chama o método put para alterar um produto
-            const response = await fetch(`http://localhost:8000/products/${editProduct?.id}`, {
+            await requestJson(`/products/${editProduct?.id}`, {
                 method: 'PUT',
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                 },
                 body: JSON.stringify(ProductEdit)
             });
 
-            //Se deu certo
-            if(response.ok){
-                const newList = myProducts.map(p => {
-                    if(p.id === editProduct?.id) {
-                        //Retorna um objeto novo unindo os dados antigos com os novos
-                        return {...p, ...ProductEdit};
-                    }
-                    return p;
-                });
+            const newList = myProducts.map(p => {
+                if(p.id === editProduct?.id) {
+                    return {...p, ...ProductEdit};
+                }
+                return p;
+            });
 
-                //Atualiza a lista
-                setMyProducts(newList);
-                //fecha o modal
-                setIsEditing(false);
-                //Envia um alert
-                //alert("Produto alterado com sucesso!");
-            } else {
-                //Se houve erro retorna isto
-                alert("Não foi possivel alterar o produto.");
-            }
-        } catch(err){
-            console.error("Erro ao editar o produto: " + err);
+            setMyProducts(newList);
+            setIsEditing(false);
+        } catch(error){
+            alert(getApiErrorMessage(error, 'Não foi possível alterar o produto agora.'));
         }
 
     }
@@ -136,9 +123,11 @@ function MainPage() {
     //Carrega os produtos toda a vez que carregar o site
     useEffect(() => {
         if (userId) {
-            fetchMyProducts();
+            // The API response updates the product list asynchronously.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            void fetchMyProducts();
         }
-    }, [userId]);
+    }, [userId, fetchMyProducts]);
 
     return <>
         <section style={{ flexGrow: 1 }}>
@@ -161,8 +150,8 @@ function MainPage() {
                         setEditProduct(product);
                         setNameProduct(product.nameProduct);
                         setCategory(product.category);
-                        setCostPrice(product.costPrice);
-                        setPriceToSell(product.priceToSell);
+                        setCostPrice(String(product.costPrice));
+                        setPriceToSell(String(product.priceToSell));
                         setQuantity(product.quantity);
                         setWarningPoint(product.warningPoint);
                         }}
