@@ -23,6 +23,9 @@ function MainPage() {
     //Booleano que verifica se o modal deve aparecer
     const [isEditing, setIsEditing] = useState(false);
 
+    //controls whether the menu is open
+    const [isMenuOpen, setMenuOpen] = useState(false);
+
     //Armazena os dados do produto a ser editado
     const [editProduct, setEditProduct] = useState<Product | null>(null);
 
@@ -69,7 +72,7 @@ function MainPage() {
         try {
             await requestJson(`/products/${id}`, {
                 method: "DELETE",
-                headers: { 
+                headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
@@ -98,26 +101,37 @@ function MainPage() {
             //Chama o método put para alterar um produto
             await requestJson(`/products/${editProduct?.id}`, {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
-                 },
+                },
                 body: JSON.stringify(ProductEdit)
             });
 
             const newList = myProducts.map(p => {
-                if(p.id === editProduct?.id) {
-                    return {...p, ...ProductEdit};
+                if (p.id === editProduct?.id) {
+                    return { ...p, ...ProductEdit };
                 }
                 return p;
             });
 
             setMyProducts(newList);
             setIsEditing(false);
-        } catch(error){
+        } catch (error) {
             alert(getApiErrorMessage(error, 'Não foi possível alterar o produto agora.'));
         }
 
+    }
+
+    //Logout accont
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("user");
+        localStorage.removeItem("email");
+
+        // Return to login page
+        window.location.replace("login");
     }
 
     //Carrega os produtos toda a vez que carregar o site
@@ -130,9 +144,40 @@ function MainPage() {
     }, [userId, fetchMyProducts]);
 
     return <>
+        <div>
+            <header className="mainPageHeader">
+                <div className="headerLeft">
+                    <button
+                        className="menuButton"
+                        onClick={() => setMenuOpen(!isMenuOpen)}
+                    >
+                        ☰
+                    </button>
+                    <h1>Nexus Estoques</h1>
+                </div>
+                <aside className={`sideMenu ${isMenuOpen ? "open" : ""}`}>
+                    <nav>
+                        <Link
+                            to="/settings"
+                            className="buttonMenu"
+                        >Configurações</Link>
+                        <Link
+                            to="/myaccount"
+                            className="buttonMenu"
+                        >Minha conta</Link>
+                    </nav>
+                    <button
+                    className="buttonMenu buttonLogout"
+                    onClick={handleLogout}
+                    >
+                        Sair
+                    </button>
+                </aside>
+            </header>
+        </div>
         <section style={{ flexGrow: 1 }}>
             <h1 className="textWelcome">Bem vindo  {user}</h1>
-            <h2 className="">Este é o estoque da sua empresa:</h2>
+            <h2 className="textWelcome">Este é o estoque da sua empresa:</h2>
             {myProducts?.map((product) => (
                 <div className="product-card" key={product.id}>
                     <h3 className="nameProduct">{product.nameProduct}</h3>
@@ -143,17 +188,17 @@ function MainPage() {
                     <p>Quantidade: {product.quantity}</p>
                     <p>Limite de pouca quantidade: {product.warningPoint}</p>
                     <button className="buttonProduct" onClick={() => handleClickDelete(product.id)}>Deletar</button>
-                    <button 
-                    className="buttonProduct" 
-                    onClick={() => { 
-                        setIsEditing(true);
-                        setEditProduct(product);
-                        setNameProduct(product.nameProduct);
-                        setCategory(product.category);
-                        setCostPrice(String(product.costPrice));
-                        setPriceToSell(String(product.priceToSell));
-                        setQuantity(product.quantity);
-                        setWarningPoint(product.warningPoint);
+                    <button
+                        className="buttonProduct"
+                        onClick={() => {
+                            setIsEditing(true);
+                            setEditProduct(product);
+                            setNameProduct(product.nameProduct);
+                            setCategory(product.category);
+                            setCostPrice(String(product.costPrice));
+                            setPriceToSell(String(product.priceToSell));
+                            setQuantity(product.quantity);
+                            setWarningPoint(product.warningPoint);
                         }}
                     >
                         Alterar
@@ -168,6 +213,7 @@ function MainPage() {
                         user: user,
                         email: email
                     }}
+                    className="registerProduct"
                 >Adicione um produto novo</Link>
             </nav>
         </section>
@@ -241,16 +287,16 @@ function MainPage() {
                         required
                     />
                     <div className="modal-actions">
-                        <button 
-                        className="buttonProduct"
-                        onClick={() => setIsEditing(false)}
-                        style={{backgroundColor: '#ccc'}} 
+                        <button
+                            className="buttonProduct"
+                            onClick={() => setIsEditing(false)}
+                            style={{ backgroundColor: '#ccc' }}
                         >
                             Cancelar
                         </button>
-                        <button 
-                        className="buttonProduct"
-                        onClick={handleclickEdit}
+                        <button
+                            className="buttonProduct"
+                            onClick={handleclickEdit}
                         >
                             Salvar
                         </button>

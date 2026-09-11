@@ -5,6 +5,8 @@ import Home from './Home'
 import Login from './Login'
 import MainPage from './MainPage';
 import RegisterToProduct from './RegisterToProduct';
+import Settings from './Settings';
+import MyAccount from './MyAccount';
 
 function App() {
   return (<>
@@ -15,6 +17,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/main_page" element={<MainPage key="main" />} />
         <Route path="register_to_product" element={<RegisterToProduct key="reg" />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/myaccount" element={<MyAccount />} />
       </Routes>
     </BrowserRouter>
   </>)

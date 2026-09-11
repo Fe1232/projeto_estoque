@@ -1,6 +1,3 @@
-/* =========================================
-   CÓDIGO QUE VOCÊ MANDOU (MANTIDO 100%)
-   ========================================= */
 body {
     background-color: #F4F7F9; /* Fundo gelo/cinza-azulado muito suave */
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -12,6 +9,7 @@ body {
     color: #1B365D; /* Azul Marinho elegante */
     font-size: 2.2rem;
     margin-bottom: 5px;
+    margin-left: 15px;
 }
 
 h2 {
@@ -90,6 +88,7 @@ nav a {
     border-radius: 8px;
     border: 2px solid #1B365D;
     transition: all 0.2s ease-in-out;
+    margin-left: 15px;
 }
 
 nav a:hover {
@@ -231,6 +230,10 @@ nav a:hover {
     border-top: 15px solid #1B365D; /* Mantendo o seu padrão do modal */
 }
 
+.formulario-login {
+    margin-top: -50px;
+}
+
 /* Estilizando as labels e inputs fora do modal para ficarem iguais */
 .labelLogin, .label-register {
     display: block;
@@ -283,4 +286,243 @@ input:focus {
     border-radius: 8px;
     margin-top: 15px;
     font-weight: bold;
+}
+
+/* ========================================
+   CONFIGURAÇÃO GERAL DA PÁGINA
+   ======================================== */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.mainPageHeader {
+    width: 100%;
+    height: 80px;
+
+    background-color: #1B365D;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    z-index: 100;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    padding-left: 24px;
+}
+
+.mainPageHeader h1 {
+    margin: 0;
+
+    color: #FFFFFF;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* ========================================
+   BOTÃO DO MENU
+   ======================================== */
+
+.menuButton {
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    border-radius: 10px;
+
+    background-color: rgba(255, 255, 255, 0.08);
+
+    color: #FFFFFF;
+
+    font-size: 27px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.menuButton:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.menuButton:active {
+    transform: scale(0.92);
+}
+
+
+/* ========================================
+   MENU LATERAL
+   ======================================== */
+
+.sideMenu {
+    position: fixed;
+
+    top: 80px;
+    left: 0;
+
+    width: 270px;
+    height: calc(100vh - 80px);
+
+    background-color: #24466F;
+
+    box-sizing: border-box;
+
+    padding: 28px 16px;
+
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.18);
+
+    z-index: 90;
+
+    /* Começa escondido fora da tela */
+    transform: translateX(-100%);
+
+    /* Animação de abrir e fechar */
+    transition: transform 0.35s ease-out;
+}
+
+
+/* ========================================
+   MENU ABERTO
+   ======================================== */
+
+.sideMenu.open {
+    transform: translateX(0);
+}
+
+
+/* ========================================
+   ÁREA DOS BOTÕES
+   ======================================== */
+
+.sideMenu nav {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+/* ========================================
+   BOTÕES DO MENU
+   ======================================== */
+
+.buttonMenu {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    min-height: 50px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border: none;
+    border-radius: 9px;
+
+    background-color: rgba(255, 255, 255, 0.07);
+
+    color: #FFFFFF;
+
+    font-family: inherit;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+    margin-left: -10px;
+}
+
+
+/* ========================================
+   EFEITO AO PASSAR O MOUSE
+   ======================================== */
+
+.buttonMenu:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+
+    transform: translateX(4px);
+
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ========================================
+   EFEITO AO CLICAR
+   ======================================== */
+
+.buttonMenu:active {
+    transform: translateX(2px) scale(0.98);
+}
+
+
+/* ========================================
+   ESPAÇO PARA O HEADER FIXO
+   ======================================== */
+
+section {
+    padding-top: 80px;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   BOTÃO SAIR
+   ======================================== */
+
+.buttonLogout {
+    margin-top: 350px;
+
+    background-color: #B52B2B;
+    color: #FFFFFF;
+}
+
+.buttonLogout:hover {
+    background-color: #D13A3A;
+
+    transform: translateX(4px);
+
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+.buttonLogout:active {
+    background-color: #9E2424;
+
+    transform: translateX(2px) scale(0.98);
 }
